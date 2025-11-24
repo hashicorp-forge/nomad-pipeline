@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+build/
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Examples
+examples/
+
+# IDE
+.vscode/
+.idea/
+.zed/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+
+# Test files
+*_test.go
+testdata/
+
+# Ignore Dockerfiles themselves
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Go specific
+go.sum
+vendor/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/

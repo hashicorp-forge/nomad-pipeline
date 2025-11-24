@@ -7,4 +7,9 @@
 *.dylib
 
 # Binary output directory
-/bin
+*bin/
+
+# Editor directories and files
+.idea/
+.vscode/
+.zed/

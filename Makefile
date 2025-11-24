@@ -18,20 +18,57 @@ bin/%/nomad-pipeline: ## Build Nomad Pipeline for GOOS & GOARCH; eg. bin/linux_a
 		-o $(GO_OUT) \
 		-trimpath \
 		-ldflags "$(GO_LDFLAGS)" \
-		internal/cli/cli.go
+		cmd/nomad-pipeline/cmd.go
+	@echo "==> Done"
+
+bin/%/nomad-pipeline-runner: GO_OUT ?= $@
+bin/%/nomad-pipeline-runner: ## Build Nomad Pipeline Runner for GOOS & GOARCH; eg. bin/linux_amd64/nomad-pipeline-runner
+	@echo "==> Building $@..."
+	@GOOS=$(firstword $(subst _, ,$*)) \
+		GOARCH=$(lastword $(subst _, ,$*)) \
+		go build \
+		-o $(GO_OUT) \
+		-trimpath \
+		-ldflags "$(GO_LDFLAGS)" \
+		cmd/nomad-pipeline-runner/cmd.go
 	@echo "==> Done"
 
 .PHONY: build
 build: ## Build a development version of Nomad Pipeline
 	@echo "==> Building Nomad Pipeline..."
 	@go build \
-		-o ./bin/nomad-pipeline \
+		-o bin/nomad-pipeline \
 		-trimpath \
 		-ldflags "$(GO_LDFLAGS)" \
-		internal/cli/cli.go
+		cmd/nomad-pipeline/cmd.go
+	@echo "==> Done"
+	@echo "==> Building Nomad Pipeline Runner..."
+	@go build \
+		-o bin/nomad-pipeline-runner \
+		-trimpath \
+		-ldflags "$(GO_LDFLAGS)" \
+		cmd/nomad-pipeline-runner/cmd.go
 	@echo "==> Done"
 
-HELP_FORMAT="    \033[36m%-25s\033[0m %s\n"
+.PHONY: clean
+clean: ## Clean built binaries
+	@echo "==> Cleaning up..."
+	@rm -rf bin/
+	@echo "==> Done"
+
+.PHONY: build-docker-all
+build-docker-all: ## Build all Docker images for all supported platforms
+	@$(MAKE) clean
+	@$(MAKE) bin/linux_amd64/nomad-pipeline
+	@$(MAKE) bin/linux_arm64/nomad-pipeline
+	@$(MAKE) bin/linux_amd64/nomad-pipeline-runner
+	@$(MAKE) bin/linux_arm64/nomad-pipeline-runner
+	@echo "==> Building all Docker images..."
+	@docker buildx build --platform linux/amd64,linux/arm64 -f build/controller/Dockerfile .
+	@docker buildx build --platform linux/amd64,linux/arm64 -f build/runner/Dockerfile .
+	@echo "==> Done"
+
+HELP_FORMAT="    \033[36m%-27s\033[0m %s\n"
 .PHONY: help
 help: ## Display this usage information
 	@echo "Valid targets:"
